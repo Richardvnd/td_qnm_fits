@@ -1,5 +1,9 @@
 """Least-squares amplitude sweep (dashed; dotted for RWZ) vs analytical TD amplitudes (solid)."""
 
+import argparse
+import json
+from pathlib import Path
+
 import numpy as np
 from matplotlib.lines import Line2D
 
@@ -26,9 +30,11 @@ Y_PAD = 0.1
 LW = 0.65                          # data lines
 CONST_COLOR, CONST_ALPHA, CONST_LW = "r", 0.5, 1.2   # table constants, across the full x range
 
-PACKAGE_DIR = package_path(DATASET)
-MODES       = mode_set(N_MAX, INCLUDE_RETRO)
-FIT_LS      = fit_linestyle(USE_RWZ)
+PACKAGE_DIR  = package_path(DATASET)
+MODES        = mode_set(N_MAX, INCLUDE_RETRO)
+FIT_LS       = fit_linestyle(USE_RWZ)
+CACHE_PATH   = Path("cache/1_amplitudes_plot_data.npz")
+FIT_SETTINGS = (DATASET, DATA_TYPE, USE_RWZ, LAMBDA_REG, N_MAX, T_FIT, INCLUDE_RETRO)
 
 
 def plot_amplitudes(t0_array, C_norm, t_td, A_td, A_const, meta, modes):
@@ -68,16 +74,34 @@ def plot_amplitudes(t0_array, C_norm, t_td, A_td, A_const, meta, modes):
     return fig
 
 
-def main():
-    meta, amp_data = load_package(PACKAGE_DIR, data_type=DATA_TYPE)
-    t, data = load_waveform(PACKAGE_DIR, USE_RWZ, DATA_TYPE, meta=meta, data=amp_data)
-
-    t_td, A_td = get_analytical_amplitude(amp_data, meta, n_max=N_MAX)
-    C_norm = fit_amplitudes(t, data, MODES, T0_ARRAY, T_FIT, lambda_reg=LAMBDA_REG)
-    A_const = load_constant_amplitudes("constant", n_max=N_MAX, meta=meta)
+def main(plot_only=False):
+    if plot_only:
+        if not CACHE_PATH.exists():
+            raise FileNotFoundError(f"{CACHE_PATH} is missing; run python 1_amplitudes.py once first")
+        with np.load(CACHE_PATH) as cached:
+            if (str(cached["fit_settings"]) != json.dumps(FIT_SETTINGS)
+                    or not np.array_equal(cached["t0_array"], T0_ARRAY)):
+                raise ValueError("Fit settings changed; run python 1_amplitudes.py to refresh the cache")
+            C_norm = cached["C_norm"]
+            t_td = cached["t_td"]
+            A_td = cached["A_td"]
+            A_const = cached["A_const"]
+            meta = json.loads(str(cached["meta"]))
+    else:
+        meta, amp_data = load_package(PACKAGE_DIR, data_type=DATA_TYPE)
+        t, data = load_waveform(PACKAGE_DIR, USE_RWZ, DATA_TYPE, meta=meta, data=amp_data)
+        t_td, A_td = get_analytical_amplitude(amp_data, meta, n_max=N_MAX)
+        C_norm = fit_amplitudes(t, data, MODES, T0_ARRAY, T_FIT, lambda_reg=LAMBDA_REG)
+        A_const = load_constant_amplitudes("constant", n_max=N_MAX, meta=meta)
+        CACHE_PATH.parent.mkdir(exist_ok=True)
+        np.savez_compressed(CACHE_PATH, fit_settings=json.dumps(FIT_SETTINGS),
+                            t0_array=T0_ARRAY, C_norm=C_norm, t_td=t_td, A_td=A_td,
+                            A_const=A_const, meta=json.dumps(meta))
 
     save(plot_amplitudes(T0_ARRAY, C_norm, t_td, A_td, A_const, meta, MODES), "1_amplitudes")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--plot-only", action="store_true", help="use cached fit data and redraw the figure")
+    main(plot_only=parser.parse_args().plot_only)

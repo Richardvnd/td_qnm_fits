@@ -37,6 +37,9 @@ Zerilli (RWZ), numerical relativity and Teukode waveforms.
 
 ## Data
 
+The analytical QNM amplitudes are included in this repository. The raw numerical
+RWZ and Teukode waveforms are not included, and are available upon request.
+
 - **`data_public/`** (in this repository) — everything needed for the analytical results:
   - **Analytical QNM amplitude packages** —
     `data_public/QNM_amplitude_packages/qnm_l2_m2_{DATASET}_N7/` with `DATASET` in
