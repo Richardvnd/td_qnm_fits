@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+__MACOSX/
+
+# Generated outputs (diagnostic test figures are not published)
+figs/test_*
+plots/
+cache/
+.claude
+
+# All local data, including the private raw RWZ (RWZHyp) and Teukode waveforms — never commit.
+# Only data_public/ is published.
+data_all/
+data/
+# Belt and braces: private raw waveform files wherever they appear.
+**/rwz_reference.dat
+**/._rwz_reference.dat
+**/Psi_l*_scri.dat
+**/trajectory.dat
+**/h_teuk*.dat
+
+# Not published
+Time_dependent_QNM_fits.pdf
+
+# Development and scratch scripts (not part of the published pipeline)
+dev_scripts/
+test_scripts/
+PLAN.md

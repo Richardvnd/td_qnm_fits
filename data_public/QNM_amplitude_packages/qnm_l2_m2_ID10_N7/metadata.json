@@ -1,0 +1,233 @@
+{
+  "applied_conversion_factor": 4.898979485566356,
+  "branch_meaning": {
+    "minus": "repository mirror mode l=2,m=-2,n",
+    "plus": "repository mode l=2,m=+2,n"
+  },
+  "branches": [
+    "plus",
+    "minus"
+  ],
+  "coefficient_provenance": {
+    "coefficient_files": {
+      "c2-20_time-dep_ID10.dat": {
+        "bytes": 1066167,
+        "sha256": "b276b85d59fc194295bc50e4362c93e1f4c724c5b4cf2dceab4b941bbe17385d"
+      },
+      "c2-21_time-dep_ID10.dat": {
+        "bytes": 1065095,
+        "sha256": "d9553ebc635f071ca3e22fa1943c808b9f105fa6898a55aaefc30934dbc1601d"
+      },
+      "c2-22_time-dep_ID10.dat": {
+        "bytes": 1073931,
+        "sha256": "0b2523226715e3a5a1b9b154ca118c7cd4ec1fca267aec152d5433d9d5af3969"
+      },
+      "c2-23_time-dep_ID10.dat": {
+        "bytes": 1072542,
+        "sha256": "a15426e9c78499a9c35bc0cd20c7643a413dab0b5853449cc0e59aafa6c293b1"
+      },
+      "c2-24_time-dep_ID10.dat": {
+        "bytes": 1072169,
+        "sha256": "06772e47389c7f656195a1f4435e34f62fe003bcf892994dc936c449920b4a38"
+      },
+      "c2-25_time-dep_ID10.dat": {
+        "bytes": 1072855,
+        "sha256": "37d101a8855d4acea8333a8f74e91d7a76cd14e058c8ff07462904f4345de9f9"
+      },
+      "c2-26_time-dep_ID10.dat": {
+        "bytes": 1079336,
+        "sha256": "2a3e54b0d251c4fa65bc221aaded8968de675faa3561bb071ea369ebf66b3034"
+      },
+      "c2-27_time-dep_ID10.dat": {
+        "bytes": 1082645,
+        "sha256": "4fcd0b4d898b082c0fca13e8ae6d4da9a1dd53e4b223d7fe3965694928bfb69c"
+      },
+      "c220_time-dep_ID10.dat": {
+        "bytes": 1073523,
+        "sha256": "2974c6feebe6e4dca8a37d7c661df82b5b1d4b17ad43151857e404588e3a7b4a"
+      },
+      "c221_time-dep_ID10.dat": {
+        "bytes": 1072173,
+        "sha256": "143529809172183e83ab8022945332c298dd35653bbfdd4d696fad9dfcd263f2"
+      },
+      "c222_time-dep_ID10.dat": {
+        "bytes": 1071295,
+        "sha256": "74e8e327850c908b07476f996c65240859d8842fd5198717ac38e7a89f84fa11"
+      },
+      "c223_time-dep_ID10.dat": {
+        "bytes": 1073232,
+        "sha256": "e34c82ec4f68cc91028606c5c2cfe2ee4219765b2a3f105f50a1875b1d8beff4"
+      },
+      "c224_time-dep_ID10.dat": {
+        "bytes": 1072057,
+        "sha256": "ffb3eeae0436e63598878b19021415c663d53855a06b73b278d2c409408bc85d"
+      },
+      "c225_time-dep_ID10.dat": {
+        "bytes": 1075069,
+        "sha256": "724c519a689d399ccd9126256d5369156ebfd486b059ac68929c56795e2ac575"
+      },
+      "c226_time-dep_ID10.dat": {
+        "bytes": 1080398,
+        "sha256": "605e47c90196ebf09873b17dd8c683a8b5f921e5a187bf58407e05334330d8b2"
+      },
+      "c227_time-dep_ID10.dat": {
+        "bytes": 1087581,
+        "sha256": "e1af36976b6732bff36605daea9c15d9fee6929776ab539717a82b58508e303d"
+      },
+      "i2-20_time-dep_ID10.dat": {
+        "bytes": 1072817,
+        "sha256": "3eb21afec8435a237f8e84cef4612847558fd73b5fbe7069523beb69d846739b"
+      },
+      "i2-21_time-dep_ID10.dat": {
+        "bytes": 1073492,
+        "sha256": "8f9a0599efbf59b642f9bc8a57173f6007e84929fbfaeabf41d466fda3bef5b1"
+      },
+      "i2-22_time-dep_ID10.dat": {
+        "bytes": 1072538,
+        "sha256": "8ef60123d4531f7afaa9bb13b18b7955ac6ca10fb0216eb23471249c74a0c91d"
+      },
+      "i2-23_time-dep_ID10.dat": {
+        "bytes": 1072598,
+        "sha256": "62b85c50d0212d537dcd6789850609ab723dab88dafc9070357967cdd09adb0a"
+      },
+      "i2-24_time-dep_ID10.dat": {
+        "bytes": 1072865,
+        "sha256": "518931bed78b5b4ea03cdb5e53d4a44c0e6b7955750b535d4dbbaef1575cb298"
+      },
+      "i2-25_time-dep_ID10.dat": {
+        "bytes": 1071288,
+        "sha256": "52f55bbfea86e558d2aee4562e5cb77c38a7a23fcca8d59b42054b195806a234"
+      },
+      "i2-26_time-dep_ID10.dat": {
+        "bytes": 1081364,
+        "sha256": "2354fbc801bced2e10d71a83004647b6b45b8ae8113ea83dc8607c8f14a55e5a"
+      },
+      "i2-27_time-dep_ID10.dat": {
+        "bytes": 1090267,
+        "sha256": "36dd0eadfd2519bdce4d1f7112e4870e1b3fd6280d3e2ed524b6e8f9a6fbdd29"
+      },
+      "i220_time-dep_ID10.dat": {
+        "bytes": 1072647,
+        "sha256": "6257871f8ea1a40cca4269679a4d3312a78505b67e0e14627689264b21bb5fc9"
+      },
+      "i221_time-dep_ID10.dat": {
+        "bytes": 1072388,
+        "sha256": "d2af59fd0e79af9147837ae9a3db5b567d11ec6ad0878eb358f3208d5df62322"
+      },
+      "i222_time-dep_ID10.dat": {
+        "bytes": 1072526,
+        "sha256": "923526e529733eb73bce63db349c8cb31fa771b1dd0257bcdf8eb591e5a19128"
+      },
+      "i223_time-dep_ID10.dat": {
+        "bytes": 1073630,
+        "sha256": "c6a0bbc24dc67cd9c69c2a12aeb70aba4eeb0daed8a49afc09012700248718f4"
+      },
+      "i224_time-dep_ID10.dat": {
+        "bytes": 1073019,
+        "sha256": "a58aa3184ffe4f8dd6e16c4149df62df2ba42181cadff4738e8f7fec4b15fe84"
+      },
+      "i225_time-dep_ID10.dat": {
+        "bytes": 1070244,
+        "sha256": "4432beac45b7011a07844b3790e0862a4bcf2be7295c5313f4a94f608ac435b2"
+      },
+      "i226_time-dep_ID10.dat": {
+        "bytes": 1080288,
+        "sha256": "6f07bd94e58d2737be542b296a3d95634de8d799ad164cd2cfa26edbddddf429"
+      },
+      "i227_time-dep_ID10.dat": {
+        "bytes": 1085317,
+        "sha256": "50a0c6b69de8eb9488fc2c4167a17b766a7694c4715ec27515086313281ab2e0"
+      }
+    },
+    "compute_path": "io.load_numerical_data -> conv.compute_coefficients -> io.save_coefficients",
+    "computed_at_utc": "2026-05-04T14:34:57.806605+00:00",
+    "eccentricity": 1.0,
+    "git": {
+      "branch": "codex/n20-overtones",
+      "commit": "32053e0751fc88d6a7657cafeecfc601cd4e93a4",
+      "dirty": true,
+      "status_short": "MM Python/export_data/package_qnm_amplitudes.py\nMM Python/export_data/unpack_qnm_amplitudes.py"
+    },
+    "i_peak": 9277,
+    "input_run_id": "10",
+    "mu": 1.0,
+    "recomputed_before_packaging": true,
+    "rho_i_plus": 90.0,
+    "rwz_h22_peak_index": 17066,
+    "rwz_h22_peak_note": "Peak time is computed from |Psi^RWZ_22| inside the light-ring-centered tau window [-10, 10]; the strain conversion is time-independent, so |h^RWZ_22| peaks at the same tau.",
+    "rwz_h22_peak_quantity": "|h^RWZ_22|",
+    "rwz_h22_peak_tau": -4.495001616850345,
+    "rwz_h22_peak_window_tau_minus_tau_LR": [
+      -10.0,
+      10.0
+    ],
+    "rwz_psi22_peak_abs": 0.124718293326,
+    "semi_latus_rectum": null,
+    "tau_end": 55.0,
+    "tau_peak": 0.0,
+    "tau_start": -95.0
+  },
+  "ell": 2,
+  "files": {
+    "amplitudes_npz": "amplitudes.npz",
+    "amplitudes_text_dir": "amplitudes",
+    "rwz_reference_text": "rwz_reference.dat"
+  },
+  "format_version": 1,
+  "id": "10",
+  "m": 2,
+  "n_max": 7,
+  "n_min": 0,
+  "notation": {
+    "A_22npm": "total packaged amplitude A_22np(tau)",
+    "tau": "observer retarded time at future null infinity"
+  },
+  "phase_convention": "h22(tau) = sum_n,p h_22np(tau) = sum_n,p A_22np(tau) exp(i omega_22np tau_minus_rho_plus)",
+  "phase_time_definition": "tau_minus_rho_plus = phase_time = tau - phase_time_shift",
+  "phase_time_shift": 90.0,
+  "qnm_frequency_convention": {
+    "plus_i_formula": {
+      "minus": "omega_22n,minus = conjugate(omega_qnm)",
+      "plus": "omega_22n,plus = -omega_qnm"
+    },
+    "qnm_package": "omega_qnm is the standard value used with exp(-i omega_qnm t)"
+  },
+  "rwz_reference": {
+    "alignment": "same phase_time_shift as reconstructed QNM amplitudes; no extra time shift or phase rotation",
+    "file_dat": "rwz_reference.dat",
+    "h_key": "h22",
+    "included": true,
+    "phase_time_definition": "tau_minus_rho_plus = tau - phase_time_shift",
+    "phase_time_key": "tau_minus_rho_plus",
+    "phase_time_shift": 90.0,
+    "psi_key": "psi22",
+    "time_key": "tau"
+  },
+  "source_coefficient_dir": "/Users/g.carullo@bham.ac.uk/Repos/plumRing/Output/analytical_amplitudes",
+  "source_repository": "/Users/g.carullo@bham.ac.uk/Repos/plumRing",
+  "stored_time_domain": {
+    "bounce_condition": "source tortoise coordinate <= 0",
+    "bounce_index_in_full_grid": 12706,
+    "dropped_pre_bounce_sample_count": 0,
+    "includes_pre_bounce": true,
+    "light_ring_index_in_full_grid": 12667,
+    "light_ring_time_definition": "local interpolated radius-3 crossing nearest tau = 0",
+    "post_bounce_sample_count": 7240,
+    "pre_bounce_sample_count": 12760,
+    "stored_after_bounce_only": false,
+    "stored_first_full_grid_index": 0,
+    "stored_last_full_grid_index": 19999,
+    "stored_sample_count": 20000,
+    "tau_bounce": 0.2945473,
+    "tau_light_ring": -0.0010686954806935793,
+    "tau_light_ring_crossing_candidates": [
+      -0.0010686954806935793,
+      54.58602953681679
+    ],
+    "tau_light_ring_nearest_sample": 0.002053777,
+    "tau_stored_end": 54.99083,
+    "tau_stored_start": -94.99833
+  },
+  "strain_conversion_factor": 4.898979485566356,
+  "strain_normalized": true
+}
