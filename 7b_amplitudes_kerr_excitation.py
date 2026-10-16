@@ -15,7 +15,8 @@ Inputs, all digitised from the paper's vector figures:
 import numpy as np
 from matplotlib.lines import Line2D
 
-from core import load_teukode_data, load_sxs_data, mode_set, qnm_frequencies
+from core import (load_teukode_data, load_sxs_data, mode_set, excitation_amplitudes, EXC_DELTA,
+                  EXC_DELTA_ERR)
 from fitting import fit_amplitudes
 from plotting import config, amplitude_grid, save
 
@@ -33,11 +34,6 @@ INCLUDE_RETRO = True
 
 NORM_T0 = 10.0   # [M] normalise (2,2,0,+) amplitude to 1 at this t0
 
-# Della Rocca et al. excitation coefficients and time alignment (see docstring)
-C_EXC = np.array([-0.0601 - 0.6883j, -0.2336 + 0.3538j, 0.1624 - 0.2003j])   # C_22n / m_p, n = 0, 1, 2
-U_LR  = -5.18    # [M]
-DELTA = -7.58    # [M]
-DELTA_ERR = 0.3  # [M], drawn as a band
 CONST_COLOR, CONST_ALPHA, CONST_LW = "r", 0.5, 1.2
 
 X_LIM = (T0_ARRAY[0], T0_ARRAY[-1])
@@ -45,13 +41,6 @@ X_LIM_HIGH = (0, 20)
 Y_LIM = (1e-4, 1e11)
 
 MODES = mode_set(N_MAX, INCLUDE_RETRO)
-
-
-def excitation_lines(delta):
-    """|C_n/C_0| exp[(Im w_n - Im w_0) U0] for n = 0, 1, 2 (prograde), with U0 = U_LR + delta."""
-    omega = qnm_frequencies([(2, 2, n, 1) for n in range(len(C_EXC))], TEUK_CHIF, TEUK_MF)
-    u0 = U_LR + delta
-    return np.abs(C_EXC / C_EXC[0]) * np.exp((omega.imag - omega[0].imag) * u0)
 
 
 def plot_amplitudes(t0_array, C_nr, C_teuk, A_exc, A_exc_band, modes):
@@ -103,8 +92,9 @@ def main():
     C_nr   = C_nr / C_nr[ref_idx, ref_col]
     C_teuk = C_teuk / C_teuk[ref_idx, ref_col]
 
-    A_exc = excitation_lines(DELTA)
-    A_exc_band = np.sort([excitation_lines(DELTA - DELTA_ERR), excitation_lines(DELTA + DELTA_ERR)], axis=0)
+    A_exc = excitation_amplitudes(TEUK_CHIF, TEUK_MF)
+    A_exc_band = np.sort([excitation_amplitudes(TEUK_CHIF, TEUK_MF, EXC_DELTA + d)
+                         for d in (-EXC_DELTA_ERR, EXC_DELTA_ERR)], axis=0)
     for n, a in enumerate(A_exc):
         fit_vals = C_teuk[:, MODES.index((2, 2, n, 1))]
         print(f"  n={n}: excitation line = {a:.3g} [{A_exc_band[0, n]:.3g}, {A_exc_band[1, n]:.3g}]   "

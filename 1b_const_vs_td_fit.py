@@ -1,7 +1,8 @@
 """Regularised fits to the constant-amplitude analytical data (table A_const, no redshift), alone and overlaid
 on the fits to the time-dependent analytical data (as fig. 1), with both sets of analytical amplitudes.
 
-Lines: |A(t)| solid; |A_const| light red; fit to constant data dash-dot; fit to time-dependent data dashed.
+Lines: |A(t)| solid; fit to constant data dash-dot; fit to time-dependent data dashed; |A_const| as right-edge
+arrows (as fig. 1).
 The constant-amplitude data start at the bounce, so their fits do too.
 """
 
@@ -11,7 +12,7 @@ from matplotlib.lines import Line2D
 from core import (load_package, load_analytical_model, get_analytical_amplitude, load_constant_amplitudes,
                   mode_set, package_path, peak_frame_times)
 from fitting import fit_amplitudes
-from plotting import config, amplitude_grid, log_ylim, mark_times, save
+from plotting import config, amplitude_grid, log_ylim, mark_times, mark_constants, constant_marker_handle, save
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 DATASET       = "ID00"     # the constant-amplitude table is for ID00 only
@@ -26,7 +27,6 @@ X_LIM_HIGH = (0, 20)
 Y_WINDOW   = 30.0          # y range: curves between the bounce and this t0 [M]
 Y_PAD      = 0.1
 LW         = 0.65
-CONST_COLOR, CONST_ALPHA, CONST_LW = "r", 0.5, 1.2
 LS_TD, LS_CONST = "--", "-."
 
 PACKAGE_DIR = package_path(DATASET)
@@ -52,25 +52,25 @@ def plot(t0_array, t_td, A_td, A_const, C_const, t0_const, meta, C_td=None):
                 ax.semilogy(t0_const, C_const[:, i], color=color, lw=LW, ls=LS_CONST)
                 if C_td is not None:
                     ax.semilogy(t0_array, C_td[:, i], color=color, lw=LW, ls=LS_TD)
-            ax.hlines(np.abs(A_const[row, n_group]), *xlim, colors=CONST_COLOR, alpha=CONST_ALPHA,
-                      lw=CONST_LW, zorder=0)
+            mark_constants(ax, A_const[row, n_group], [config.colors[n] for n in n_group])
             post = (t_td >= t_bounce) & (t_td <= t_hi)
-            in_view += [np.abs(A_td[row, n_group])[:, post], np.abs(A_const[row, n_group]),
-                        C_const[t0_const <= t_hi][:, cols]]
+            in_view += [np.abs(A_td[row, n_group])[:, post].min(), np.abs(A_const[row, n_group]),
+                        C_const[t0_const <= t_hi][:, cols].min()]
             if C_td is not None:
-                in_view.append(C_td[(t0_array >= t_bounce) & (t0_array <= t_hi)][:, cols])
+                in_view.append(C_td[(t0_array >= t_bounce) & (t0_array <= t_hi)][:, cols].min())
             mark_times(ax, meta)
             ax.set_xlim(*xlim)
             if row == 0:
-                ax.add_artist(ax.legend(fontsize=7, loc="upper left", frameon=False))
+                ax.add_artist(ax.legend(fontsize=7, loc="lower right" if col == 1 else "upper left",
+                                        frameon=False))
         axes[row, 0].set_ylim(*log_ylim(in_view, Y_PAD))
 
-    handles = [Line2D([0], [0], color="k", lw=LW, label=r"$|\hat{A}(t)|$"),
-               Line2D([0], [0], color=CONST_COLOR, alpha=CONST_ALPHA, lw=CONST_LW, label=r"$|\hat{A}_{\rm const}|$"),
-               Line2D([0], [0], color="k", lw=LW, ls=LS_CONST, label=r"$|\hat{C}(t_0)|$, constant data")]
+    handles = [Line2D([0], [0], color="k", lw=LW, label=r"$|\hat{A}(t)|$")]
     if C_td is not None:
-        handles.append(Line2D([0], [0], color="k", lw=LW, ls=LS_TD, label=r"$|\hat{C}(t_0)|$, time-dependent data"))
-    axes[1, 1].legend(handles=handles, loc="lower right", fontsize=6)
+        handles.append(Line2D([0], [0], color="k", lw=LW, ls=LS_TD, label=r"$|\hat{C}(t_0)|$, TD data"))
+    handles += [Line2D([0], [0], color="k", lw=LW, ls=LS_CONST, label=r"$|\hat{C}(t_0)|$, const.\ data"),
+                constant_marker_handle()]
+    axes[1, 1].legend(handles=handles, loc="lower right", fontsize=6, ncol=2, columnspacing=0.8, handlelength=1.8)
     return fig
 
 

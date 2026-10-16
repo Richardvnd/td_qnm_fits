@@ -9,7 +9,7 @@ import bgp_qnm_fits as bgp
 
 from core import load_package, get_analytical_h22np
 from fitting import regularized_bgp_samples
-from plotting import config, amplitude_grid, mark_times
+from plotting import config, amplitude_grid, mark_times, mark_constants, constant_marker_handle
 
 
 def resolution_noise_var(package_dir, t0, n_max, data_type="strain"):
@@ -126,25 +126,24 @@ def plot_mode_content(modes_list, t0_grid, n_max, meta, label):
     return fig
 
 
-CONST_COLOR, CONST_ALPHA, CONST_LW = "r", 0.5, 1.2   # late-time constant amplitudes, as fig. 1
+def _bgp_handles(ref_label, fit_ls, show_const):
+    handles = [Line2D([0], [0], color="k", label=ref_label),
+               Line2D([0], [0], color="k", ls=fit_ls, label=r"$|\hat{C}(t_0)|$")]
+    if show_const:
+        handles.append(constant_marker_handle())
+    return handles
 
 
 def _bgp_legend(ax, fig, ref_label, fit_ls, show_const=False):
     """Linestyle legend, nudged 6 pt up to clear the curves below it."""
     nudge_up = ScaledTranslation(0, 6 / 72, fig.dpi_scale_trans)
-    handles = [Line2D([0], [0], color="k", label=ref_label),
-               Line2D([0], [0], color="k", ls=fit_ls, label=r"$|\hat{C}(t_0)|$")]
-    if show_const:
-        handles.append(Line2D([0], [0], color=CONST_COLOR, alpha=CONST_ALPHA, lw=CONST_LW,
-                              label=r"$|\hat{A}_{\rm const}|$"))
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 1.0),
-              bbox_transform=ax.transAxes + nudge_up)
+    ax.legend(handles=_bgp_handles(ref_label, fit_ls, show_const), loc="upper center",
+              bbox_to_anchor=(0.5, 1.0), bbox_transform=ax.transAxes + nudge_up)
 
 
-def _draw_const(ax, A_const_row, n_group, x_lim):
-    """Late-time constant amplitudes as horizontal lines behind the data."""
-    ax.hlines(np.abs(A_const_row[list(n_group)]), *x_lim, colors=CONST_COLOR, alpha=CONST_ALPHA,
-              lw=CONST_LW, zorder=0)
+def _draw_const(ax, A_const_row, n_group):
+    """Late-time constant amplitudes as arrowheads on the right edge, in each overtone's colour."""
+    mark_constants(ax, A_const_row[list(n_group)], [config.colors[n] for n in n_group])
 
 
 def _draw_bgp(ax, n, sign, t0_array, bands, t_ref, A_ref_row, fit_ls):
@@ -176,7 +175,7 @@ def plot_bgp_amplitudes(t0_array, bands, t_ref, A_ref, meta, n_max, x_lims, y_li
             for n in n_group:
                 _draw_bgp(ax, n, sign, t0_array, bands, t_ref, A_ref[row, n], fit_ls)
             if A_const is not None:
-                _draw_const(ax, A_const[row], n_group, x_lims[col])
+                _draw_const(ax, A_const[row], n_group)
             mark_times(ax, meta)
             ax.set_xlim(*x_lims[col])
             ax.set_ylim(*y_lim)
@@ -200,7 +199,7 @@ def plot_bgp_amplitudes_low(t0_array, bands, t_ref, A_ref, meta, n_max, x_lim, y
         for n in n_group:
             _draw_bgp(ax, n, sign, t0_array, bands, t_ref, A_ref[row, n], fit_ls)
         if A_const is not None:
-            _draw_const(ax, A_const[row], n_group, x_lim)
+            _draw_const(ax, A_const[row], n_group)
         mark_times(ax, meta)
         ax.set_xlim(*x_lim)
         ax.set_ylim(*y_lim)
@@ -209,6 +208,9 @@ def plot_bgp_amplitudes_low(t0_array, bands, t_ref, A_ref, meta, n_max, x_lim, y
     axes[0].tick_params(labelbottom=False)
     axes[0].set_title(rf"$n = {n_group[0]}$--${n_group[-1]}$")
     _overtone_legend(axes[0], n_group, ncol=2)
+    # Linestyle legend in the empty top of the upper panel, just after the bounce.
+    axes[0].legend(handles=_bgp_handles(ref_label, fit_ls, A_const is not None), loc="upper left",
+                   bbox_to_anchor=(0.33, 1.0), fontsize=7, frameon=False, handlelength=1.6,
+                   handletextpad=0.4, labelspacing=0.25, borderaxespad=0.3)
     axes[-1].set_xlabel(r"$t_0$ [$M$]")
-    _bgp_legend(axes[-1], fig, ref_label, fit_ls, show_const=A_const is not None)
     return fig

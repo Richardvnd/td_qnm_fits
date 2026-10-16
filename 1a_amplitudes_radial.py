@@ -1,14 +1,16 @@
 """Fig. 1 for radial infall (ID10), strain (no psi4 differentiation): LS sweep vs analytical TD amplitudes.
 
-No table constants: the only constant-amplitude table is for ID00.
+Arrows: late-time constant amplitudes from the ID10 table (n <= 6).
 """
 
 import numpy as np
 from matplotlib.lines import Line2D
 
-from core import load_package, load_waveform, get_analytical_amplitude, mode_set, package_path, peak_frame_times
+from core import (load_package, load_waveform, get_analytical_amplitude, load_constant_amplitudes, mode_set,
+                  package_path, peak_frame_times)
 from fitting import fit_amplitudes
-from plotting import config, amplitude_grid, log_ylim, fit_linestyle, mark_times, save
+from plotting import (config, amplitude_grid, log_ylim, fit_linestyle, mark_times, mark_constants,
+                      constant_marker_handle, save)
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 DATASET       = "ID10"     # radial infall (e=1)
@@ -33,7 +35,7 @@ MODES       = mode_set(N_MAX, INCLUDE_RETRO)
 FIT_LS      = fit_linestyle(USE_RWZ)
 
 
-def plot_amplitudes(t0_array, C_norm, t_td, A_td, meta, modes):
+def plot_amplitudes(t0_array, C_norm, t_td, A_td, A_const, meta, modes):
     """Analytical (solid) vs least-squares amplitudes on the 2x2 grid."""
     mode_col = {(sign, n): i for i, (_, _, n, sign) in enumerate(modes)}
     fig, axes, n_groups = amplitude_grid(N_MAX)
@@ -52,6 +54,7 @@ def plot_amplitudes(t0_array, C_norm, t_td, A_td, meta, modes):
             t_hi = min(Y_WINDOW, xlim[1])
             in_view += [np.abs(A_td[row, n_group])[:, (t_td >= t_bounce) & (t_td <= t_hi)],
                         C_norm[(t0_array >= t_bounce) & (t0_array <= t_hi)][:, [mode_col[(sign, n)] for n in n_group]]]
+            mark_constants(ax, A_const[row, n_group], [config.colors[n] for n in n_group])
             mark_times(ax, meta)
             ax.set_xlim(*xlim)
             if row == 0:
@@ -62,7 +65,8 @@ def plot_amplitudes(t0_array, C_norm, t_td, A_td, meta, modes):
     axes[1, 1].legend(handles=[
         Line2D([0], [0], color="k", lw=LW, label=r"$|\hat{A}(t)|$"),
         Line2D([0], [0], color="k", lw=LW, ls=FIT_LS, label=r"$|\hat{C}(t_0)|$"),
-    ], loc="lower right")
+        constant_marker_handle(),
+    ], loc="lower right", ncol=2, columnspacing=0.8, handlelength=1.6)
     return fig
 
 
@@ -71,9 +75,10 @@ def main():
     t, data = load_waveform(PACKAGE_DIR, USE_RWZ, DATA_TYPE, meta=meta, data=amp_data)
 
     t_td, A_td = get_analytical_amplitude(amp_data, meta, n_max=N_MAX)
+    A_const = load_constant_amplitudes("constant", n_max=N_MAX, meta=meta, data_type=DATA_TYPE)
     C_norm = fit_amplitudes(t, data, MODES, T0_ARRAY, T_FIT, lambda_reg=LAMBDA_REG)
 
-    save(plot_amplitudes(T0_ARRAY, C_norm, t_td, A_td, meta, MODES), "1a_amplitudes_radial")
+    save(plot_amplitudes(T0_ARRAY, C_norm, t_td, A_td, A_const, meta, MODES), "1a_amplitudes_radial")
 
 
 if __name__ == "__main__":

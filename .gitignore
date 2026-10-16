@@ -25,6 +25,8 @@ data/
 **/trajectory.dat
 **/h_teuk*.dat
 
+figs/redshift_test
+
 # Not published
 Time_dependent_QNM_fits.pdf
 

@@ -37,6 +37,21 @@ def mark_times(ax, meta, **kw):
     ax.axvline(times["t_bounce"], color=config.color_bounce, ls=":", **kw)
 
 
+CONST_MARKER, CONST_MARKER_SIZE, CONST_MARKER_X = "<", 5.0, 0.985   # x in axes fraction
+
+
+def mark_constants(ax, values, colors):
+    """Left-pointing arrowheads on the right edge of ``ax`` at the late-time constant amplitudes."""
+    for value, color in zip(np.abs(values), colors):
+        ax.plot([CONST_MARKER_X], [value], ls="none", marker=CONST_MARKER, ms=CONST_MARKER_SIZE,
+                color=color, mec=color, transform=ax.get_yaxis_transform(), clip_on=False, zorder=5)
+
+
+def constant_marker_handle(label=r"$|\hat{A}_{\rm const}|$"):
+    """Legend handle for :func:`mark_constants`."""
+    return Line2D([0], [0], ls="none", marker=CONST_MARKER, ms=CONST_MARKER_SIZE, color="k", label=label)
+
+
 def lambda_label(lam):
     """LaTeX label for ridge strength ``lam`` (lambda^2 in the paper)."""
     if lam == 0:

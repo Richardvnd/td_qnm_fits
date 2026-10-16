@@ -1,15 +1,17 @@
 """Radial infall: analytical amplitudes vs fits to RWZ (dotted) and SXS:BBH:3991 (dash-dot).
 
 RWZ and NR fits set (2,2,0,+) = 1 at NORM_T0; the analytical curve shares the RWZ factor.
+Arrows: late-time constant amplitudes from the ID10 table (n <= 6), as psi4 (-omega^2 A), with the RWZ factor.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from core import load_package, load_rwz, get_analytical_amplitude, load_sxs_data, mode_set, package_path
+from core import (load_package, load_rwz, get_analytical_amplitude, load_constant_amplitudes, load_sxs_data,
+                  mode_set, package_path)
 from fitting import fit_amplitudes
-from plotting import config, mark_times, overtone_groups, save
+from plotting import config, mark_times, mark_constants, constant_marker_handle, overtone_groups, save
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 DATASET       = "ID10"     # radial infall (e=1)
@@ -31,7 +33,7 @@ PACKAGE_DIR = package_path(DATASET)
 MODES       = mode_set(N_MAX, INCLUDE_RETRO)
 
 
-def plot_amplitudes(t0_array, C_nr, C_rwz, t_td, A_td, meta, modes):
+def plot_amplitudes(t0_array, C_nr, C_rwz, t_td, A_td, A_const, meta, modes):
     """One row (co-rotating), low/high overtone columns; light-ring and bounce times marked."""
     mode_col = {(sign, n): i for i, (_, _, n, sign) in enumerate(modes)}
 
@@ -48,6 +50,7 @@ def plot_amplitudes(t0_array, C_nr, C_rwz, t_td, A_td, meta, modes):
             ax.semilogy(t_td, np.abs(A_td[0, n]), color=color, label=rf"$n={n}$")
             ax.semilogy(t0_array, C_nr[:, idx], color=color, ls="-.")
             ax.semilogy(t0_array, C_rwz[:, idx], color=color, ls=":")
+        mark_constants(ax, A_const[0, n_group], [config.colors[n] for n in n_group])
         mark_times(ax, meta)
         ax.set_xlim(*(X_LIM if col == 0 else X_LIM_HIGH))
         ax.set_ylim(*Y_LIM)
@@ -62,13 +65,16 @@ def plot_amplitudes(t0_array, C_nr, C_rwz, t_td, A_td, meta, modes):
         Line2D([0], [0], color="k", label=r"$|\hat{A}(t)|$"),
         Line2D([0], [0], color="k", ls=":", label=r"$|\hat{C}(t_0)|$ (Pert)"),
         Line2D([0], [0], color="k", ls="-.", label=r"$|\hat{C}(t_0)|$ (NR)"),
-    ], loc="lower right", ncol=2, fontsize=6.5)
+        constant_marker_handle(),
+    ], loc="lower right", ncol=2, fontsize=6.5, columnspacing=0.6, handlelength=1.4,
+       handletextpad=0.3, borderaxespad=0.3)
     return fig
 
 
 def main():
     meta, amp_data = load_package(PACKAGE_DIR, data_type=DATA_TYPE)
     t_td, A_td = get_analytical_amplitude(amp_data, meta, n_max=N_MAX)
+    A_const = load_constant_amplitudes("constant", n_max=N_MAX, meta=meta, data_type=DATA_TYPE)
     t_rwz, data_rwz = load_rwz(PACKAGE_DIR, data_type=DATA_TYPE, meta=meta)
 
     print(f"Loading {SXS_ID} ({DATA_TYPE})...", flush=True)
@@ -84,10 +90,11 @@ def main():
     ref_idx = np.argmin(np.abs(T0_ARRAY - NORM_T0))
     rwz_ref = C_rwz[ref_idx, ref_col]
     A_td    = A_td / rwz_ref
+    A_const = A_const / rwz_ref
     C_rwz   = C_rwz / rwz_ref
     C_nr    = C_nr / C_nr[ref_idx, ref_col]
 
-    save(plot_amplitudes(T0_ARRAY, C_nr, C_rwz, t_td, A_td, meta, MODES), "8_amplitudes_radial_NR")
+    save(plot_amplitudes(T0_ARRAY, C_nr, C_rwz, t_td, A_td, A_const, meta, MODES), "8_amplitudes_radial_NR")
 
 
 if __name__ == "__main__":

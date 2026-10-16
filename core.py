@@ -9,7 +9,8 @@ import numpy as np
 import qnm
 from scipy.signal import savgol_filter
 
-# Late-time cutoff [M, peak frame], below every package's frozen tail (ID00 58.7M, ID10 59.5M).
+# Late-time cutoff [M, peak frame] for the analytical amplitudes, below every package's frozen tail
+# (ID00 58.7M, ID10 59.5M). RWZ data are not cut here.
 T_END_SAFE = 57.0
 
 # np.trapz became np.trapezoid in numpy 2.0; the sxs/bgp env is on numpy 1.26.
@@ -97,7 +98,7 @@ def peak_frame_times(meta):
 # Table labels: "220" = (2, 2, 0), "2-20" = (2, -2, 0); single-digit l, |m|.
 _MODE_LABEL_RE = re.compile(r"^(\d)(-?\d)(\d+)$")
 
-CONSTANT_TABLE = f"{PUBLIC_DATA}/table_l2m2_late_times_r2.5569_ID00.dat"
+CONSTANT_TABLE = f"{PUBLIC_DATA}/table_l2m2_late_times_r2.5569_ID00.dat"   # ID10: Aqnm only, n <= 6
 _CONSTANT_COLUMNS = {'constant': 'Aqnm', 'redshift': 'Red0'}
 
 
@@ -118,19 +119,30 @@ def constant_amplitude_scale(kind, meta, n_max):
     return factor
 
 
-def load_constant_amplitudes(kind='constant', n_max=None, path=CONSTANT_TABLE,
-                              data=None, meta=None, scale=True):
-    """Constant ('Aqnm') or redshift ('Red0') table amplitudes, shape (2, n_max + 1).
+def constant_table_path(dataset_id="00"):
+    """Late-time constant-amplitude table for package ID ``dataset_id`` ('00' or '10')."""
+    return f"{PUBLIC_DATA}/table_l2m2_late_times_r2.5569_ID{dataset_id}.dat"
 
+
+def load_constant_amplitudes(kind='constant', n_max=None, path=None,
+                              data=None, meta=None, scale=True, data_type='strain'):
+    """Constant ('Aqnm') or redshift ('Red0') table amplitudes, shape (2, n_max + 1); NaN where absent.
+
+    ``path`` defaults to the table for ``meta``'s package ID (ID00 without ``meta``).
+    ``data_type='psi4'`` returns the psi4 amplitudes -omega^2 A (exact for constant A).
     With ``data`` and ``meta``, returns (t, A(t)) on the package grid, NaN before the bounce.
     """
+    if path is None:
+        path = constant_table_path(meta["id"] if meta is not None else "00")
     if kind not in _CONSTANT_COLUMNS:
         raise ValueError(f"kind must be one of {sorted(_CONSTANT_COLUMNS)}, got {kind!r}")
     column = _CONSTANT_COLUMNS[kind]
 
     # Explicit dtype: auto-detection reads '220' as an int, then fails on '2-20'.
+    with open(path) as f:
+        n_columns = len(f.readline().split())
     table = np.genfromtxt(path, names=True, encoding=None,
-                          dtype=["U8"] + ["f8"] * 4)
+                          dtype=["U8"] + ["f8"] * (n_columns - 1))
     table = np.atleast_1d(table)
 
     if f"Real_{column}" not in table.dtype.names:
@@ -161,12 +173,20 @@ def load_constant_amplitudes(kind='constant', n_max=None, path=CONSTANT_TABLE,
                 "load_constant_amplitudes(scale=True) needs `meta` from "
                 "load_package to build the conversion factor; pass meta=..., "
                 "or scale=False to get the raw table values.")
-        if path == CONSTANT_TABLE and meta.get("id") != "00":
+        if path != constant_table_path(meta.get("id")):
             warnings.warn(
-                f"{CONSTANT_TABLE} was computed for ID00 but meta is for "
-                f"ID{meta.get('id')}; the scaling uses this package's t_peak.",
+                f"{path} is not the table for ID{meta.get('id')}; "
+                f"the scaling uses this package's t_peak.",
                 RuntimeWarning, stacklevel=2)
         A_const = A_const * constant_amplitude_scale(kind, meta, n_max)
+
+    if data_type == 'psi4':
+        if kind != 'constant' or meta is None:
+            raise ValueError("data_type='psi4' needs kind='constant' and meta.")
+        for p, sign in enumerate((1, -1)):
+            A_const[p] *= -_branch_frequencies(meta, n_max, sign) ** 2
+    elif data_type != 'strain':
+        raise ValueError(f"data_type must be 'strain' or 'psi4', got {data_type!r}")
 
     if data is None or meta is None:
         return A_const
@@ -191,9 +211,10 @@ def _find_peak_after_transient(tau, h, tau_skip_until):
 
 
 def load_rwz(package_dir, data_type='strain', meta=None, clip_to_window=True,
-             resolution=20):
-    """Numerical RWZ waveform (t, h22); peak frame and clipped to the package window if ``meta`` given.
+             resolution=20, t_end=None):
+    """Numerical RWZ waveform (t, h22); peak frame and cut to t >= the package start if ``meta`` given.
 
+    The late end is kept (the data run to ~500 M, unlike the analytical T_END_SAFE); pass ``t_end`` to cut it.
     Read from the ``PRIVATE_DATA`` mirror of ``package_dir``.
     """
     package_dir = _resolve_package_dir(package_dir, resolution)
@@ -207,8 +228,11 @@ def load_rwz(package_dir, data_type='strain', meta=None, clip_to_window=True,
         tau = tau - meta["coefficient_provenance"]["rwz_h22_peak_tau"]
         if clip_to_window:
             times = peak_frame_times(meta)
-            mask = (tau >= times["t_start"]) & (tau <= T_END_SAFE)
+            mask = tau >= times["t_start"]
             tau, h22 = tau[mask], h22[mask]
+    if t_end is not None:
+        mask = tau <= t_end
+        tau, h22 = tau[mask], h22[mask]
     return tau, h22
 
 
@@ -333,6 +357,32 @@ def _second_time_derivative(h, t):
     """d^2h/dt^2 by repeated np.gradient (strain to psi4)."""
     dh_dt = np.gradient(h, t, edge_order=2)
     return np.gradient(dh_dt, t, edge_order=2)
+
+
+# Stationary excitation coefficients for the Kerr (a = 0.6921) Teukode comparison (fig. 7)
+
+# Della Rocca, Pezzella, Berti, Gualtieri & Maselli, arXiv:2512.07959: critical plunge from the ISCO.
+# Digitised from the paper's vector figures (dev_scripts/della_rocca_excitation/):
+#   EXC_C22N   C_22n / m_p at a = 0.6921, n = 0, 1, 2 (prograde), from their Fig. 3; matches Table I to 4 s.f.
+#   EXC_U_LR   light-ring retarded time in the u = t - r* the C_22n multiply: their Fig. 2 mode sums
+#              are k sum_n C_22n e^{-i w_n u} with one real k (0.332) and u_LR = -5.18 M.
+#   EXC_DELTA  offset placing their light ring at Teukode t = -EXC_DELTA (TEUK_T_SHIFT = 6 frame), from
+#              matching the Teukode h22 to their full waveform (Fig. 2); +/- EXC_DELTA_ERR across windows.
+EXC_C22N      = np.array([-0.0601 - 0.6883j, -0.2336 + 0.3538j, 0.1624 - 0.2003j])
+EXC_U_LR      = -5.18
+EXC_DELTA     = -7.58
+EXC_DELTA_ERR = 0.3
+
+
+def excitation_amplitudes(chif, Mf=1.0, delta=EXC_DELTA):
+    """Decay-corrected |C_n| / |C_0| at Teukode t = 0 for n = 0, 1, 2 (prograde), from EXC_C22N.
+
+    h = sum_n C_n e^{-i w_n u} with u = t + EXC_U_LR + delta, so each amplitude at t = 0 is
+    |C_n| e^{Im(w_n) (EXC_U_LR + delta)}; dividing by n = 0 matches the (2,2,0,+) = 1 normalisation.
+    """
+    omega = qnm_frequencies([(2, 2, n, 1) for n in range(len(EXC_C22N))], chif, Mf)
+    u0 = EXC_U_LR + delta
+    return np.abs(EXC_C22N / EXC_C22N[0]) * np.exp((omega.imag - omega[0].imag) * u0)
 
 
 # General functions

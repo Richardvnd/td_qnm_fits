@@ -10,7 +10,8 @@ from matplotlib.lines import Line2D
 from core import (load_package, load_waveform, get_analytical_amplitude, load_constant_amplitudes,
                   mode_set, package_path, peak_frame_times)
 from fitting import fit_amplitudes
-from plotting import config, amplitude_grid, log_ylim, fit_linestyle, mark_times, save
+from plotting import (config, amplitude_grid, log_ylim, fit_linestyle, mark_times, mark_constants,
+                      constant_marker_handle, save)
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 DATASET       = "ID00"     # "ID00" or "ID10"
@@ -28,7 +29,6 @@ X_LIM_HIGH = (0, 20)
 Y_WINDOW = 30.0   # y floor: lowest curve between the bounce and this t0 [M]; ceiling: highest constant
 Y_PAD = 0.1
 LW = 0.65                          # data lines
-CONST_COLOR, CONST_ALPHA, CONST_LW = "r", 0.5, 1.2   # table constants, across the full x range
 
 PACKAGE_DIR  = package_path(DATASET)
 MODES        = mode_set(N_MAX, INCLUDE_RETRO)
@@ -38,7 +38,7 @@ FIT_SETTINGS = (DATASET, DATA_TYPE, USE_RWZ, LAMBDA_REG, N_MAX, T_FIT, INCLUDE_R
 
 
 def plot_amplitudes(t0_array, C_norm, t_td, A_td, A_const, meta, modes):
-    """Analytical (solid) vs least-squares amplitudes on the 2x2 grid; table constants in red."""
+    """Analytical (solid) vs least-squares amplitudes on the 2x2 grid; table constants as right-edge arrows."""
     mode_col = {(sign, n): i for i, (_, _, n, sign) in enumerate(modes)}
     fig, axes, n_groups = amplitude_grid(N_MAX)
     t_bounce = peak_frame_times(meta)["t_bounce"]
@@ -57,8 +57,7 @@ def plot_amplitudes(t0_array, C_norm, t_td, A_td, A_const, meta, modes):
             in_view += [np.abs(A_td[row, n_group])[:, (t_td >= t_bounce) & (t_td <= t_hi)].min(),
                         C_norm[(t0_array >= t_bounce) & (t0_array <= t_hi)][:, [mode_col[(sign, n)] for n in n_group]].min(),
                         np.abs(A_const[row, n_group])]
-            ax.hlines(np.abs(A_const[row, n_group]), *xlim, colors=CONST_COLOR,
-                      alpha=CONST_ALPHA, lw=CONST_LW, zorder=0)
+            mark_constants(ax, A_const[row, n_group], [config.colors[n] for n in n_group])
             mark_times(ax, meta)
             ax.set_xlim(*xlim)
             if row == 0:
@@ -69,7 +68,7 @@ def plot_amplitudes(t0_array, C_norm, t_td, A_td, A_const, meta, modes):
     axes[1, 1].legend(handles=[
         Line2D([0], [0], color="k", lw=LW, label=r"$|\hat{A}(t)|$"),
         Line2D([0], [0], color="k", lw=LW, ls=FIT_LS, label=r"$|\hat{C}(t_0)|$"),
-        Line2D([0], [0], color=CONST_COLOR, alpha=CONST_ALPHA, lw=CONST_LW, label=r"$|\hat{A}_{\rm const}|$"),
+        constant_marker_handle(),
     ], loc="lower right")
     return fig
 
